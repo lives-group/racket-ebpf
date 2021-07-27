@@ -1,0 +1,371 @@
+@article{Ball06,
+author = {Ball, Thomas and Bounimova, Ella and Cook, Byron and Levin, Vladimir and Lichtenberg, Jakob and McGarvey, Con and Ondrusek, Bohus and Rajamani, Sriram K. and Ustuner, Abdullah},
+title = {Thorough Static Analysis of Device Drivers},
+year = {2006},
+issue_date = {October 2006},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {40},
+number = {4},
+issn = {0163-5980},
+url = {https://doi.org/10.1145/1218063.1217943},
+doi = {10.1145/1218063.1217943},
+abstract = {Bugs in kernel-level device drivers cause 85% of the system crashes in the Windows
+XP operating system [44]. One of the sources of these errors is the complexity of
+the Windows driver API itself: programmers must master a complex set of rules about
+how to use the driver API in order to create drivers that are good clients of the
+kernel. We have built a static analysis engine that finds API usage errors in C programs.
+The Static Driver Verifier tool (SDV) uses this engine to find kernel API usage errors
+in a driver. SDV includes models of the OS and the environment of the device driver,
+and over sixty API usage rules. SDV is intended to be used by driver developers "out
+of the box." Thus, it has stringent requirements: (1) complete automation with no
+input from the user; (2) a low rate of false errors. We discuss the techniques used
+in SDV to meet these requirements, and empirical results from running SDV on over
+one hundred Windows device drivers.},
+journal = {SIGOPS Oper. Syst. Rev.},
+month = apr,
+pages = {73–85},
+numpages = {13},
+keywords = {formal verification, software model checking}
+}
+
+
+@inproceedings{10.1145/1217935.1217943,
+author = {Ball, Thomas and Bounimova, Ella and Cook, Byron and Levin, Vladimir and Lichtenberg, Jakob and McGarvey, Con and Ondrusek, Bohus and Rajamani, Sriram K. and Ustuner, Abdullah},
+title = {Thorough Static Analysis of Device Drivers},
+year = {2006},
+isbn = {1595933220},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1217935.1217943},
+doi = {10.1145/1217935.1217943},
+abstract = {Bugs in kernel-level device drivers cause 85% of the system crashes in the Windows
+XP operating system [44]. One of the sources of these errors is the complexity of
+the Windows driver API itself: programmers must master a complex set of rules about
+how to use the driver API in order to create drivers that are good clients of the
+kernel. We have built a static analysis engine that finds API usage errors in C programs.
+The Static Driver Verifier tool (SDV) uses this engine to find kernel API usage errors
+in a driver. SDV includes models of the OS and the environment of the device driver,
+and over sixty API usage rules. SDV is intended to be used by driver developers "out
+of the box." Thus, it has stringent requirements: (1) complete automation with no
+input from the user; (2) a low rate of false errors. We discuss the techniques used
+in SDV to meet these requirements, and empirical results from running SDV on over
+one hundred Windows device drivers.},
+booktitle = {Proceedings of the 1st ACM SIGOPS/EuroSys European Conference on Computer Systems 2006},
+pages = {73–85},
+numpages = {13},
+keywords = {software model checking, formal verification},
+location = {Leuven, Belgium},
+series = {EuroSys '06}
+}
+
+@inproceedings{Akash14,
+author = {Lal, Akash and Qadeer, Shaz},
+title = {Powering the Static Driver Verifier Using Corral},
+year = {2014},
+isbn = {9781450330565},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2635868.2635894},
+doi = {10.1145/2635868.2635894},
+abstract = { The application of software-verification technology towards building realistic bug-finding
+tools requires working through several precision-scalability tradeoffs. For instance,
+a critical aspect while dealing with C programs is to formally define the treatment
+of pointers and the heap. A machine-level modeling is often intractable, whereas one
+that leverages high-level information (such as types) can be inaccurate. Another tradeoff
+is modeling integer arithmetic. Ideally, all arithmetic should be performed over bitvector
+representations whereas the current practice in most tools is to use mathematical
+integers for scalability. A third tradeoff, in the context of bounded program exploration,
+is to choose a bound that ensures high coverage without overwhelming the analysis.
+This paper works through these three tradeoffs when we applied Corral, an SMT-based
+verifier, inside Microsoft's Static Driver Verifier (SDV). Our decisions were guided
+by experimentation on a large set of drivers; the total verification time exceeded
+well over a month. We justify that each of our decisions were crucial in getting value
+out of Corral and led to Corral being accepted as the engine that powers SDV in the
+Windows 8.1 release, replacing the SLAM engine that had been used inside SDV for the
+past decade. },
+booktitle = {Proceedings of the 22nd ACM SIGSOFT International Symposium on Foundations of Software Engineering},
+pages = {202–212},
+numpages = {11},
+keywords = {Language Semantics, Bitvector Reasoning, Loop Coverage, Device Drivers, Software Verification, SMT},
+location = {Hong Kong, China},
+series = {FSE 2014}
+}
+
+@article{Nadav17,
+author = {Amit, Nadav and Wei, Michael and Tu, Cheng-Chun},
+title = {Hypercallbacks},
+year = {2017},
+issue_date = {August 2017},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {51},
+number = {1},
+issn = {0163-5980},
+url = {https://doi.org/10.1145/3139645.3139654},
+doi = {10.1145/3139645.3139654},
+journal = {SIGOPS Oper. Syst. Rev.},
+month = sep,
+pages = {54–59},
+numpages = {6}
+}
+@article{Bershad95,
+author = {Bershad, B. N. and Savage, S. and Pardyak, P. and Sirer, E. G. and Fiuczynski, M. E. and Becker, D. and Chambers, C. and Eggers, S.},
+title = {Extensibility Safety and Performance in the SPIN Operating System},
+year = {1995},
+issue_date = {Dec. 3, 1995},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {29},
+number = {5},
+issn = {0163-5980},
+url = {https://doi.org/10.1145/224057.224077},
+doi = {10.1145/224057.224077},
+journal = {SIGOPS Oper. Syst. Rev.},
+month = dec,
+pages = {267–283},
+numpages = {17}
+}
+
+
+@inproceedings{10.1145/224056.224077,
+author = {Bershad, B. N. and Savage, S. and Pardyak, P. and Sirer, E. G. and Fiuczynski, M. E. and Becker, D. and Chambers, C. and Eggers, S.},
+title = {Extensibility Safety and Performance in the SPIN Operating System},
+year = {1995},
+isbn = {0897917154},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/224056.224077},
+doi = {10.1145/224056.224077},
+booktitle = {Proceedings of the Fifteenth ACM Symposium on Operating Systems Principles},
+pages = {267–283},
+numpages = {17},
+location = {Copper Mountain, Colorado, USA},
+series = {SOSP '95}
+}
+
+@article{Fahndrich06,
+author = {F\"{a}hndrich, Manuel and Aiken, Mark and Hawblitzel, Chris and Hodson, Orion and Hunt, Galen and Larus, James R. and Levi, Steven},
+title = {Language Support for Fast and Reliable Message-Based Communication in Singularity OS},
+year = {2006},
+issue_date = {October 2006},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {40},
+number = {4},
+issn = {0163-5980},
+url = {https://doi.org/10.1145/1218063.1217953},
+doi = {10.1145/1218063.1217953},
+abstract = {Message-based communication offers the potential benefits of providing stronger specification
+and cleaner separation between components. Compared with shared-memory interactions,
+message passing has the potential disadvantages of more expensive data exchange (no
+direct sharing) and more complicated programming.In this paper we report on the language,
+verification, and run-time system features that make messages practical as the sole
+means of communication between processes in the Singularity operating system. We show
+that using advanced programming language and verification techniques, it is possible
+to provide and enforce strong system-wide invariants that enable efficient communication
+and low-overhead software-based process isolation. Furthermore, specifications on
+communication channels help in detecting programmer mistakes early---namely at compile-time---thereby
+reducing the difficulty of the message-based programming model.The paper describes
+our communication invariants, the language and verification features that support
+them, as well as implementation details of the infrastructure. A number of benchmarks
+show the competitiveness of this approach.},
+journal = {SIGOPS Oper. Syst. Rev.},
+month = apr,
+pages = {177–190},
+numpages = {14},
+keywords = {asynchronous communication, data ownership, channels, static checking, protocols}
+}
+
+
+@inproceedings{10.1145/1217935.1217953,
+author = {F\"{a}hndrich, Manuel and Aiken, Mark and Hawblitzel, Chris and Hodson, Orion and Hunt, Galen and Larus, James R. and Levi, Steven},
+title = {Language Support for Fast and Reliable Message-Based Communication in Singularity OS},
+year = {2006},
+isbn = {1595933220},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1217935.1217953},
+doi = {10.1145/1217935.1217953},
+abstract = {Message-based communication offers the potential benefits of providing stronger specification
+and cleaner separation between components. Compared with shared-memory interactions,
+message passing has the potential disadvantages of more expensive data exchange (no
+direct sharing) and more complicated programming.In this paper we report on the language,
+verification, and run-time system features that make messages practical as the sole
+means of communication between processes in the Singularity operating system. We show
+that using advanced programming language and verification techniques, it is possible
+to provide and enforce strong system-wide invariants that enable efficient communication
+and low-overhead software-based process isolation. Furthermore, specifications on
+communication channels help in detecting programmer mistakes early---namely at compile-time---thereby
+reducing the difficulty of the message-based programming model.The paper describes
+our communication invariants, the language and verification features that support
+them, as well as implementation details of the infrastructure. A number of benchmarks
+show the competitiveness of this approach.},
+booktitle = {Proceedings of the 1st ACM SIGOPS/EuroSys European Conference on Computer Systems 2006},
+pages = {177–190},
+numpages = {14},
+keywords = {data ownership, asynchronous communication, protocols, channels, static checking},
+location = {Leuven, Belgium},
+series = {EuroSys '06}
+}
+
+@inproceedings{McCanne93,
+author = {McCanne, Steven and Jacobson, Van},
+title = {The BSD Packet Filter: A New Architecture for User-Level Packet Capture},
+year = {1993},
+publisher = {USENIX Association},
+address = {USA},
+abstract = {Many versions of Unix provide facilities for user-level packet capture, making possible
+the use of general purpose workstations for network monitoring. Because network monitors
+run as user-level processes, packets must be copied across the kernel/user-space protection
+boundary. This copying can be minimized by deploying a kernel agent called a packet
+filter, which discards unwanted packets as early as possible. The original Unix packet
+filter was designed around a stack-based filter evaluator that performs sub-optimally
+on current RISC CPUs. The BSD Packet Filter (BPF) uses a new, register-based filter
+evaluator that is up to 20 times faster than the original design. BPF alson uses a
+straighforward buffering strategy that makes its overall performance up to 100 times
+faster than Sun's NIT running on the same hardware.},
+booktitle = {Proceedings of the USENIX Winter 1993 Conference Proceedings on USENIX Winter 1993 Conference Proceedings},
+pages = {2},
+numpages = {1},
+location = {San Diego, California},
+series = {USENIX'93}
+}
+
+@book{Pierce02,
+author = {Pierce, Benjamin C.},
+title = {Types and Programming Languages},
+year = {2002},
+isbn = {0262162091},
+publisher = {The MIT Press},
+edition = {1st},
+abstract = {A type system is a syntactic method for automatically checking the absence of certain
+erroneous behaviors by classifying program phrases according to the kinds of values
+they compute. The study of type systems -- and of programming languages from a type-theoretic
+perspective -- has important applications in software engineering, language design,
+high-performance compilers, and security.This text provides a comprehensive introduction
+both to type systems in computer science and to the basic theory of programming languages.
+The approach is pragmatic and operational; each new concept is motivated by programming
+examples and the more theoretical sections are driven by the needs of implementations.
+Each chapter is accompanied by numerous exercises and solutions, as well as a running
+implementation, available via the Web. Dependencies between chapters are explicitly
+identified, allowing readers to choose a variety of paths through the material.The
+core topics include the untyped lambda-calculus, simple type systems, type reconstruction,
+universal and existential polymorphism, subtyping, bounded quantification, recursive
+types, kinds, and type operators. Extended case studies develop a variety of approaches
+to modeling the features of object-oriented languages.}
+}
+
+@article{Klein12,
+author = {Klein, Casey and Clements, John and Dimoulas, Christos and Eastlund, Carl and Felleisen, Matthias and Flatt, Matthew and McCarthy, Jay A. and Rafkind, Jon and Tobin-Hochstadt, Sam and Findler, Robert Bruce},
+title = {Run Your Research: On the Effectiveness of Lightweight Mechanization},
+year = {2012},
+issue_date = {January 2012},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {47},
+number = {1},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/2103621.2103691},
+doi = {10.1145/2103621.2103691},
+abstract = {Formal models serve in many roles in the programming language community. In its primary
+role, a model communicates the idea of a language design; the architecture of a language
+tool; or the essence of a program analysis. No matter which role it plays, however,
+a faulty model doesn't serve its purpose.One way to eliminate flaws from a model is
+to write it down in a mechanized formal language. It is then possible to state theorems
+about the model, to prove them, and to check the proofs. Over the past nine years,
+PLT has developed and explored a lightweight version of this approach, dubbed Redex.
+In a nutshell, Redex is a domain-specific language for semantic models that is embedded
+in the Racket programming language. The effort of creating a model in Redex is often
+no more burdensome than typesetting it with LaTeX; the difference is that Redex comes
+with tools for the semantics engineering life cycle.},
+journal = {SIGPLAN Not.},
+month = jan,
+pages = {285–296},
+numpages = {12},
+keywords = {lightweight semantics engineering}
+}
+
+
+@inproceedings{10.1145/2103656.2103691,
+author = {Klein, Casey and Clements, John and Dimoulas, Christos and Eastlund, Carl and Felleisen, Matthias and Flatt, Matthew and McCarthy, Jay A. and Rafkind, Jon and Tobin-Hochstadt, Sam and Findler, Robert Bruce},
+title = {Run Your Research: On the Effectiveness of Lightweight Mechanization},
+year = {2012},
+isbn = {9781450310833},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2103656.2103691},
+doi = {10.1145/2103656.2103691},
+abstract = {Formal models serve in many roles in the programming language community. In its primary
+role, a model communicates the idea of a language design; the architecture of a language
+tool; or the essence of a program analysis. No matter which role it plays, however,
+a faulty model doesn't serve its purpose.One way to eliminate flaws from a model is
+to write it down in a mechanized formal language. It is then possible to state theorems
+about the model, to prove them, and to check the proofs. Over the past nine years,
+PLT has developed and explored a lightweight version of this approach, dubbed Redex.
+In a nutshell, Redex is a domain-specific language for semantic models that is embedded
+in the Racket programming language. The effort of creating a model in Redex is often
+no more burdensome than typesetting it with LaTeX; the difference is that Redex comes
+with tools for the semantics engineering life cycle.},
+booktitle = {Proceedings of the 39th Annual ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+pages = {285–296},
+numpages = {12},
+keywords = {lightweight semantics engineering},
+location = {Philadelphia, PA, USA},
+series = {POPL '12}
+}
+
+@article{Chang17,
+author = {Chang, Stephen and Knauth, Alex and Greenman, Ben},
+title = {Type Systems as Macros},
+year = {2017},
+issue_date = {January 2017},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {52},
+number = {1},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/3093333.3009886},
+doi = {10.1145/3093333.3009886},
+abstract = {We present Turnstile, a metalanguage for creating typed embedded languages. To implement
+the type system, programmers write type checking rules resembling traditional judgment
+syntax. To implement the semantics, they incorporate elaborations into these rules.
+Turnstile critically depends on the idea of linguistic reuse. It exploits a macro
+system in a novel way to simultaneously type check and rewrite a surface program into
+a target language. Reusing a macro system also yields modular implementations whose
+rules may be mixed and matched to create other languages. Combined with typical compiler
+and runtime reuse, Turnstile produces performant typed embedded languages with little
+effort.},
+journal = {SIGPLAN Not.},
+month = jan,
+pages = {694–705},
+numpages = {12},
+keywords = {type systems, typed embedded DSLs, macros}
+}
+
+
+@inproceedings{10.1145/3009837.3009886,
+author = {Chang, Stephen and Knauth, Alex and Greenman, Ben},
+title = {Type Systems as Macros},
+year = {2017},
+isbn = {9781450346603},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3009837.3009886},
+doi = {10.1145/3009837.3009886},
+abstract = {We present Turnstile, a metalanguage for creating typed embedded languages. To implement
+the type system, programmers write type checking rules resembling traditional judgment
+syntax. To implement the semantics, they incorporate elaborations into these rules.
+Turnstile critically depends on the idea of linguistic reuse. It exploits a macro
+system in a novel way to simultaneously type check and rewrite a surface program into
+a target language. Reusing a macro system also yields modular implementations whose
+rules may be mixed and matched to create other languages. Combined with typical compiler
+and runtime reuse, Turnstile produces performant typed embedded languages with little
+effort.},
+booktitle = {Proceedings of the 44th ACM SIGPLAN Symposium on Principles of Programming Languages},
+pages = {694–705},
+numpages = {12},
+keywords = {macros, typed embedded DSLs, type systems},
+location = {Paris, France},
+series = {POPL 2017}
+}

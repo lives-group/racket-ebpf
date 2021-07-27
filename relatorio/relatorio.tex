@@ -1,0 +1,177 @@
+\documentclass[paper=a4, fontsize=12pt]{article}
+
+\usepackage[portuguese]{babel}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{proof}
+
+\usepackage{iftex}
+\pagestyle{empty}
+
+\ifTUTeX
+  \usepackage{fontspec}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc} % The default since 2018
+  \DeclareUnicodeCharacter{200B}{{\hskip 0pt}}
+\fi
+
+\newtheorem{theorem}{Teorema}
+\newtheorem{lemma}{Lema}
+\newtheorem{corollary}{Corolário}
+\theoremstyle{definition}
+\newtheorem{Example}{Exemplo}
+\newtheorem{Definition}{Definição}
+
+
+\begin{document}
+
+\begin{center}
+  UNIVERSIDADE FEDERAL DE OURO PRETO \\
+  DEPARTAMENTO DE COMPUTAÇÃO\\
+\end{center}
+\vspace{2cm}
+
+\begin{center}
+{\bf\Large Título:} \Large{Semântica formal e validação de filtros de pacotes linux expressos na linguagem eBPF}
+\end{center}
+\vspace{4cm}
+\begin{flushleft}
+Aluno: Rafael Diniz de Oliveira\\
+Orientador: Dr. Rodrigo Geraldo Ribeiro\\
+\end{flushleft}
+\vspace{4cm}
+\noindent
+Relatório Final, referente ao período 08/2020 a 07/2021, apresentado à
+Universidade Federal de Ouro Preto, como parte das exigências do
+programa de iniciação científica do edital EDITAL
+\vspace{1cm}
+\begin{center}
+Ouro Preto - Minas Gerais - Brasil\\
+\today
+\end{center}
+
+\clearpage
+
+\begin{center}
+{\bf\Large Resumo:}\\ \Large{Semântica formal e validação de filtros de pacotes linux expressos na linguagem eBPF}
+\end{center}
+
+\vspace{1cm}
+
+O Extended Berkeley Packet Filter (eBPF) é um subsistema Linux que permite executar
+extensões não confiáveis definidas pelo usuário dentro do kernel. Para proteger o
+kernel contra código malicioso, o eBPF utiliza técnicas de análise estática simples.
+Porém, a medida que a linguagem eBPF cresce em popularidade, o seu ecossistema evolui
+para oferecer suporte a extensões mais complexas e diverisificadas. Porém, as limitações
+presentes em seu verificador atual, como a sua alta taxa de falsos positivos e falta
+de suporte a comandos de repetição, tornaram-se um grande empecilho para sua ampla
+adoção por desenvolvedores de aplicações de rede. Neste sentido, o presente projeto
+pretende aplicar técnicas de semântica formal e sistemas de tipos de maneira a
+aumentar a suporte do verificador eBPF, permitindo assim que programadores
+desenvolvam aplicações de maneira simples e garantindo a segurança do kernel
+estendido.
+
+
+
+\begin{center}
+https://github.com/lives-group/racket-ebpf
+\end{center}
+\vspace{2cm}
+\begin{center}
+\begin{tabular}{c}
+$\,$  \\
+$\,$  \\
+\hline
+Bolsista: Rafael Diniz de Oliveira\\
+$\,$  \\
+$\,$  \\
+$\,$  \\ \hline
+Orientador: Prof. Dr. Rodrigo Geraldo Ribeiro
+\end{tabular}
+\end{center}
+
+
+
+\clearpage
+
+\section{Introdução}
+
+Os sistemas operacionais modernos implementam a maior parte de sua funcionalidade
+por meio de extensões carregadas dinamicamente que proveem suporte para dispositivos
+de E / S, sistemas de arquivos, redes, etc. Essas extensões são executadas no modo
+privilegiado da CPU e, portanto, devem ser verificadas  para assegurar a
+ausência de código malicioso. Tradicionalmente a validação destas extensões é
+estabelecida através do uso de testes para eliminar bugs. Além disso, as ferramentas de
+verificação formal são usadas, em alguns casos, para obter maior segurança~\cite{Ball06,Akash14}.
+Apesar de tais ferramentas serem eficazes para encontrar bugs, estas não possuem fortes
+garantias de correção.
+
+As extensões do kernel são um tipo especial de aplicação  que se originam de fontes não confiáveis ​​e,
+portanto, não podem ser consideradas seguras. Essas extensões ​​permitem que aplicativos personalizem o
+kernel com algoritmos específicos para processamento de pacotes, políticas de segurança,
+profiling e até modifiquem como os principais subsistemas do kernel~\cite{Nadav17}.
+
+No passado, os sistemas operacionais utilizavam técnicas como sandboxing para a execução de extensões
+não confiáveis dentro do kernel. Além disso, algumas abordagens se valiam de linguagens de
+domínio específico de domínio~\cite{Bershad95, Fahndrich06} e interpretadores
+de bytecode~\cite{McCanne93}. Porém, essas abordagens se mostraram restritivas para alguns casos em que
+o desempenho é um fator crítico.
+
+Como uma forma de amenizar essas falhas, o Linux adotou uma abordagem baseada no uso de um
+verificador de código, chamado de Exteded Berkeley Package Filters (eBPF). Programas eBPF
+consistem de bytecode simples que é compilado em instruções nativas da CPU quando carregado pelo
+kernel. Ao contrário dos bytecodes da Java Virtual Machine, o compilador e o run-time de eBPF
+não impõe nenhum restrição de tipo. A validade de programas eBPF é imposta por um
+verificador estático que impede que programas possam acessar estruturas de dados arbitrárias
+do kernel.
+
+Atualmente, programadores eBPF enfrentam quatro grandes problemas. O primeiro deles é que
+o verificador de eBPF apresenta uma taxa elevada de falsos positivos, isto é, rejeita como
+inseguros programas que não oferecem risco algum ao kernel. Essa limitação obriga desenvolvedores
+a reescrever seu código de forma a este ser aceito pelo verificador. Muitas vezes, essas
+alterações envolvem a inserção de acessos e verificações redundantes. O segundo problema é que
+o algoritmo utilizado pelo verificado é sensível ao número de caminhos presente no programa analisado.
+Terceiro, atualmente o verificador impõe a séria restrição de que programas não devem possuir loops.
+Finalmente, o verificador atual não é especificado formalmente e isso dificulta a predição de quando
+um código será ou não por ele recusado.
+
+Diante do apresentado, o presente projeto pretende especificar formalmente um verificador de
+programas eBPF de forma a solucionar as limitações apresentadas. Para isso, utilizaremos técnicas
+conhecidas do projeto de linguagens de programação, a saber: semântica formal e
+sistemas de tipos~\cite{Pierce02,Klein12,Chang17}.
+
+
+\section{Revisão da Literatura}
+
+\subsection{A linguagem eBPF}
+
+Aqui você deve apresentar uma introdução à linguagem eBPF.
+Explicando o que é a linguagem e o porquê de sua criação.
+
+Adicionalmente, se possível, coloque
+exemplos de programas eBPF simples. Como programas eBPF são escritos usando bibliotecas C
+ou Python, você pode procurar esses exemplos e explicá-los nessa seção.
+
+\subsection{A linguagem Racket}
+
+Aqui você deve apresentar uma breve introdução à linguagem
+racket. Minha idéia é você apresentar sobre a definição de funções,
+tipos de dados e macros. Na sequência você pode explicar a implementação daquela
+máquina virtual simples que fiz.
+
+\section{Desenvolvimento}
+
+Nesta seção, você deve descrever sua implementação do interpretador de ebPF.
+
+
+\section{Conclusão e Trabalhos Futuros}
+
+Essa seção vai depender do que você escrever na seção de desenvolvimento. Deixaremos
+para escrever por último.
+
+
+\bibliographystyle{plain}
+\bibliography{referencias}
+\end{document}
