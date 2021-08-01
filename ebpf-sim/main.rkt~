@@ -1,0 +1,140 @@
+#lang br/quicklang
+(require bv)
+
+
+(struct ebpf-state
+  (pc            ;; program counter
+   code          ;; instructions
+   regs-m        ;; registers M[]
+   reg-x         ;; register X
+   acc-a         ;; accumulator A
+   labels)       ;; hash table mapping labels to its line offset in the program
+   #:transparent)
+
+(define (initial-state instrs)
+  (ebpf-state
+   0
+   instrs
+   (make-vector 16 (bv 0 32))
+   (bv 2 32)
+   (bv 2 32)
+   '#hash()))
+
+;(define (pre-state st)
+;  (cons (ebpf-state-pc st) (ebpf-state-acc-a st) (ebpf-state-reg-x) (ebpf-state-regs-m)))
+
+
+(define (exec st)
+  (define current-pc (ebpf-state-pc st))
+  (define code-size (length (ebpf-state-code st)))
+  (if (>= current-pc code-size)
+      st
+      (let* ([next-instr (list-ref (ebpf-state-code st) current-pc)]
+             [next-state (next-instr st)])
+        (exec next-state))))
+
+;ld operation with Addressing mode 1
+(define (ld-add1 k st)
+  (match st
+    ((ebpf-state pc instrs m x a labels)
+    (ebpf-state (add1 pc) instrs m x k labels))))
+
+;general definition for jump operations
+(define (jump-to-label st key)
+  (define new-pc (hash-ref (ebpf-state-labels st) key))
+  (match st
+    ((ebpf-state pc instrs m x a labels)
+     (ebpf-state new-pc instrs m x a labels))))
+
+;st operation
+(define (st-add3 k st)
+  (match st
+    ((ebpf-state pc instrs m x a labels)
+     (ebpf-state (add1 pc)
+                 instrs
+                 (vector-set! m k a)
+                 x
+                 a
+                 labels))))
+
+;stx operation
+(define (stx-add3 k st)
+  (match st
+    ((ebpf-state pc instrs m x a labels)
+     (ebpf-state (add1 pc)
+                 instrs
+                 (vector-set! m k x)
+                 x
+                 a
+                 labels))))
+
+;general definition for arithmetic instructions
+(define (arith-instr k op st)
+  (match st
+    ((ebpf-state pc instrs m x a labels)
+     (ebpf-state (add1 pc) instrs m x (op a k) labels))))
+
+
+;general definition for ADD operations
+(define (add-gen k st)
+  (arith-instr k bvadd st))
+
+;add operation with addressing mode 0
+(define (add-add0 st)
+  (add-gen (ebpf-state-reg-x st) st))
+
+;add operation with addressing mode 4
+(define (add-add4 k st)
+  (add-gen (bv k 32) st))
+
+
+;general definition for SUB operations
+(define (sub-gen k st)
+  (arith-instr k bvsub st))
+
+;sub operation with addressing mode 0
+(define (sub-add0 st)
+  (sub-gen (ebpf-state-reg-x st) st))
+
+;sub operation with addressing mode 4
+(define (sub-add4 k st)
+  (sub-gen (bv k 32) st))
+
+
+;general definition for MUL operations
+(define (mul-gen k st)
+  (arith-instr k bvmul st))
+
+;sub operation with addressing mode 0
+(define (mul-add0 st)
+  (mul-gen (ebpf-state-reg-x st) st))
+
+;sub operation with addressing mode 4
+(define (mul-add4 k st)
+  (mul-gen (bv k 32) st))
+
+
+;general definition for DIV operations
+(define (div-gen k st)
+  (arith-instr k bvudiv st))
+
+;div operation with addressing mode 0
+(define (div-add0 st)
+  (div-gen (ebpf-state-reg-x st) st))
+
+;div operation with addressing mode 4
+(define (div-add4 k st)
+  (div-gen (bv k 32) st))
+
+
+;general definition for MOD operations
+(define (mod-gen k st)
+  (arith-instr k bvsmod st))
+
+;mod operation with addressing mode 0
+(define (mod-add0 st)
+  (mod-gen (ebpf-state-reg-x st) st))
+
+;mod operation with addressing mode 4
+(define (mod-add4 k st)
+  (mod-gen (bv k 32) st))
