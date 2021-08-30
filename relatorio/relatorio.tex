@@ -5,7 +5,10 @@
 \usepackage[utf8]{inputenc}
 \usepackage{color}
 \usepackage{proof}
+\usepackage{listings}
+\usepackage{graphicx}
 
+\graphicspath{{./images/}}
 \usepackage{iftex}
 \pagestyle{empty}
 
@@ -147,8 +150,25 @@ sistemas de tipos~\cite{Pierce02,Klein12,Chang17}.
 
 \subsection{A linguagem eBPF}
 
-Aqui você deve apresentar uma introdução à linguagem eBPF.
-Explicando o que é a linguagem e o porquê de sua criação.
+Sitemas Unix se tornaram um sinônimo de uso eficiente de redes e usuários UNIX passaram a depender
+de acesso seguro e responsivo. No entanto, essa dependência faz com que problemas de conexão podem
+fazer com que seja impossível realizar tarefas realmente úteis. A solução de problemas requer 
+ferramentas de análise e diagnóstico apropriadas e, de preferência, essas ferramentas devem ser 
+acessíveis de onde os problemas acontecem, em estações de trabalho UNIX.  E para permitir que essas
+ferramentas sejam criadas, o kernel deve ter alguma forma de fornecer dados não processados da rede
+para programas no nível de usuário~\cite{McCanne93}. Assim sendo, foi criado o BPF (Berkeley Packet 
+Filter) uma nova arquitetura do kernel para captura de pacotes.
+
+No entanto, na medida que processadores evoluíram para registradores de 64 bits e a arquitetura de
+instruções utilizada no BPF foi sendo deixada de lado, o foco do filtro de pacotes em fornecer um
+pequeno número de instruções RISC não satisfaziam a realidade de processadores modernos. Então, Alexei
+Starovoitov introduziu o modelo do extended BPF (eBPF)  para tirar proveito dos novos avanços de hardware.
+
+A versão oficial do kernel que adicionou o suporte ao eBPF mostrou que este era até quatro vezes mais
+rápido em arquitetura x86-64 do que o antigo classic BPF, para alguns microbenchmarks de filtro de rede
+e a maioria era 1,5 vezes mais rápido.
+
+\textbf{**Ainda não terminado**}
 
 Adicionalmente, se possível, coloque
 exemplos de programas eBPF simples. Como programas eBPF são escritos usando bibliotecas C
@@ -156,15 +176,369 @@ ou Python, você pode procurar esses exemplos e explicá-los nessa seção.
 
 \subsection{A linguagem Racket}
 
-Aqui você deve apresentar uma breve introdução à linguagem
-racket. Minha idéia é você apresentar sobre a definição de funções,
+Racket é uma linguagem da família de linguagens Lisp, que foi com o objetivo
+principal de servir como uma plataforma para criação de linguagens, ainda que
+seja usada em diversos contextos. Para tal objetivo, Racket conta com um
+sistema de macros extremamente poderoso, o que facilita a definição de síntaxe
+a partir transformação de um padrão de código em código Racket.
+
+Um código Racket é composto por s-expressions, que geram um valor atômico 
+ou uma lista de valores, uma função é um valor atômico do tipo procedure, o significa
+que funções podem ser passadas como qualquer outro valor em Racket. Além disso, as funções
+só são avaliadas quando invocadas em tempo de execução, permitindo que uma função
+passada por parâmetro permaneça não calculada até que o valor gerado pela mesma
+terminalmente necessário. Funções em Racket são definidas usando define.
+
+\textbf{**Ainda não terminado**}
+
 tipos de dados e macros. Na sequência você pode explicar a implementação daquela
 máquina virtual simples que fiz.
 
+\begin{lstlisting}
+  (define (my-sum x y)
+    (+ x y))
+  (my-sum 3 5)
+\end{lstlisting}
+
 \section{Desenvolvimento}
+\subsection{Construção da arquitetura eBPF}
 
-Nesta seção, você deve descrever sua implementação do interpretador de ebPF.
+O interpretador simula uma arquitetura eBPF a partir de uma maquina virtual com três
+elementos básicos:
+\begin{itemize}
+\item Um acumulador A de 32 bits.
+\item Um registrador X de 32 bits.
+\item Um conjunto M de 16 registradors de 32bits.
+\end{itemize}
 
+Além disso a maquina virtual precisa de outros campos para correr o programa, começando
+por um pc, para controlar o fluxo do programa; um campo para armazenamento de todas as 
+instruções; e um campo que mapeia os labels do programa eBPF ao seu deslocamento a partir
+do ínicio do programa.
+
+\begin{lstlisting}
+  (struct ebpf-state
+    (pc            ;; program counter
+     code          ;; instructions
+     regs-m        ;; registers M[]
+     reg-x         ;; register X
+     acc-a         ;; accumulator A
+     labels)       ;; hash table mapping labels to its
+                   ;; line offset in the program
+     #:transparent)
+\end{lstlisting}
+
+O interpretador inicia a maquina virtual, recebendo a lista de instruções do programa,
+enquanto, outros campo são iniciados vazios ou zerados.
+Para garantir que os registradores e o acumulador tenham os tamanhos apropriados (32bits),
+o interpretador inicia seus respectivos campos com o tipo de dado bitvectors e realiza
+todas as operações básicas em sua implementação para bitvectors.  
+
+\begin{lstlisting}
+  (define (initial-state instrs)
+    (ebpf-state
+    0
+    instrs
+    (make-vector 16 (bv 0 32))
+    (bv 0 32)
+    (bv 0 32)
+    '#hash()))
+\end{lstlisting}
+
+\subsection{Execução da máquina virtual}
+O primeiro comando a ser executado depois de gerada a lista de intruções é aquele que dará
+ínicio a máquina virtual, chamado pelo interpretador de exec. A função desse comando é, a partir de
+um estado representado por ebpf-state, realizar a próxima instrução do programa e retornar um novo
+estado para execução até que o programa se encerre. 
+
+\begin{lstlisting}
+  (define (exec st)
+    (...)
+    (let* ([next-instr (list-ref (ebpf-state-code st)
+                                 (ebpf-state-pc st)]
+           [next-state (next-instr st)])
+      (exec next-state)))  
+           
+\end{lstlisting}
+
+O encerramento do programa pode ocorrer de duas formas, caso não haja mais intruções a 
+serem executados ou caso uma instrução termine o programa. Em qualquer dos casos, o contador do 
+programa deve exceder a quantidade de instruções, logo, é essencial que a função que encerra o
+programa incremente o contador para garantir o encerramento do programa.
+
+\begin{lstlisting}
+  (define (ret st)
+  (define code-size (length (ebpf-state-code st)))
+  (match st
+    ((ebpf-state pc instrs m x a labels)
+     (ebpf-state code-size instrs m x a labels))))
+\end{lstlisting}
+
+Por fim, a máquina virtual deve verificar sempre que receber um novo estado, se o contador
+excedeu o tamanho do programa, para isso dentro da função de execução existem duas variáveis de
+controle, uma para o número atual da instrução, outro para o tamanho total do programa.
+
+\begin{lstlisting}
+  (define (exec st)
+  (define current-pc (ebpf-state-pc st))
+  (define code-size (length (ebpf-state-code st)))
+  (if (>= current-pc code-size)
+      st
+      (let* ([next-instr (list-ref (ebpf-state-code st) 
+                                    current-pc)]
+             [next-state (next-instr st)])
+        (exec next-state))))
+\end{lstlisting}
+
+\subsection{Labels}
+
+O campo labels é iniciado como uma tabela hash vazia que deve, ao ínicio da execução,
+ser preenchida, isso é feito percorrendo a lista de instruções e mapeando a chave de
+cada Label a seu deslocamento de linhas no programa. Para isso, ainda é necessário 
+implementar os métodos que geram a lista de instruções e definir a macro que gera a
+hash de cada Label.
+
+\subsection{Instruções}
+
+O programa será processado pelo interpretador e a partir de um algoritmo do novo
+modelo eBPF, deve ser gerada uma lista de instruções em Racket, que a partir do uso de macros
+poderão ser transformadas em funções aplicáveis a um estado da máquina virtual, essas funções,
+por sua vez representam instruções eBPF originais. No entanto, ainda é necessário fazer a implementação
+dos métodos  que interpretam o programa em ebpf-sim para Racket, o método main, além das macros
+que transformam as instruções em funções Racket. 
+
+Todas as funções que manipulam palavras, ou seja um Bitvector de 32bits, estão implementadas
+arquivo expander.rkt dentro do diretorio ebpf-sim, o arquivo por sua vez, deve importar a biblioteca 
+bv, para fazer uso destes tipos de dados. As funções que representam as intruções ldh,ldb e ldbxb
+ainda não foram implementadas.
+
+Todas as instruções de load para o acumulador A passam pela função ld, a partir de um dado k e um
+estado, altera o valor salvo no acumulador A para o dado recebido.
+
+\begin{lstlisting}
+  (define (ld k st)
+    (match st
+      ((ebpf-state pc instrs m x a labels)
+       (ebpf-state (add1 pc) instrs m x k labels))))
+\end{lstlisting}
+
+Outras funções que carregam palavras para A, só precisam formatar seu endereçamento para a função
+anterior. A máquina virtual ainda não consegue encontrar o deslocamento em bytes no programa.
+Com isso, resta apenas tornar possível carregar palavras guardadas em qualquer dos registradores M.
+
+Carregar palavras para o registrador X, segue exatamente o mesmo padrão de carregar palavras para
+o acumulador, utilizando a função ldx, e também deve conseguir carregar palavras dos registradores M.
+
+\begin{lstlisting}
+  (define (ld-add3 k st)
+    (ld (vector-ref (ebpf-state-regs-m st) k) st))
+
+  (define (ldx-add3 k st)
+    (ldx (vector-ref (ebpf-state-regs-m st) k) st))
+
+  (define ldi ld)
+\end{lstlisting}
+
+Guardar as informações do registrador X e do acumulador é trabalho das funções st, que assim como ld
+existe uma referente ao acumulador outra referente ao registrador, ambas as funções requerem que seja
+passado um deslocamento k, referente a posição do registrador no vetor M de registradores.
+
+\begin{lstlisting}
+  (define (stx-add3 k st)
+    (match st
+      ((ebpf-state pc instrs m x a labels)
+       (ebpf-state (add1 pc)
+                  instrs
+                  (vector-set! m k x)
+                  x
+                  a
+                  labels))))
+\end{lstlisting}
+
+Porém o interpretador eBPF ainda não tem uma função que permite transferir dados do registrador X para o
+acumulador A nem o contrário, isto é feito nas especificações do eBPF através da instrução tax que transfere
+de A para X e da instrução txa que transfere de X para A.
+
+\begin{lstlisting}
+  ;tax
+  (define (tax st)
+    (match st
+      ((ebpf-state pc instrs m x a labels)
+       (ebpf-state (add1 pc) instrs m a a labels))))
+  
+  ;txa
+  (define (txa st)
+    (match st
+      ((ebpf-state pc instrs m x a labels)
+       (ebpf-state (add1 pc) instrs m x x labels))))  
+\end{lstlisting}
+
+Instruções de salto dependem da construção prévia da tabela hash e utiliza os Labels como keys da tabela
+para encontrar a posição adequada do pacote em que deve apontar o contador do programa. Assim como nas
+instruções de load, para salto também é interessante definir uma função generalizada para reduzir a repetição
+do código e essa função é o salto incondicional jmp ou ja.
+
+\begin{lstlisting}
+  (define (jump-to-label st key)
+    (define new-pc (hash-ref (ebpf-state-labels st) key))
+    (match st
+      ((ebpf-state pc instrs m x a labels)
+      (ebpf-state new-pc instrs m x a labels))))
+  (define jmp jump-to-label)
+  (define ja jump-to-label)
+\end{lstlisting}
+
+Os saltos condicionais também seguem um outro padrão próprio, além de fazerem a alteração do contador para
+a posição do Label desejado, esses saltos aplicam uma condição para tomar a decisão de qual salto tomar, logo
+é fácil generalizar essa definição para evitar repetição de código. No entanto, é necessário se atentar que
+alguns endereçamentos não recebem um direcionamento caso a condição não se satisfaça. Por isso, quando a condição
+não é satisfeita, a função geral deve verificar se qual tipo de endereçamento foi recebido.
+
+\begin{lstlisting}
+  (define (jmp-cond st cond k lt lf)    ;cond needs 
+                                        ;;a logical operator 
+    (if (cond (ebpf-state-acc-a st) k)
+        (jump-to-label st lt)
+        (if (null? lf)
+            (nop st)
+            (jump-to-label st lf))))
+\end{lstlisting}
+
+Além disso, documentação de eBPF define 12 formas de endereçar instruções, das quais os saltos
+só usam quatro, onde k é um campo genérico de uma instrução eBPF, Lt um Label para salto quando a condiçãofor verdadeira
+e Lf um Label para salto quando a condição for falsa.  
+
+\begin{center}
+\begin{tabular}{ |c|c| }
+  \hline
+  Modo de endereçamento & Descrição\\
+  \hline
+  7 & compara um valor k e salta para Lt quando verdade ou Lf\\
+  & quando falso\\
+  \hline
+  8 & compara o registrador x e salta para Lt quando verdade\\ 
+  & ou Lf quando falso\\
+  \hline
+  9 & compara um valor k e salta para Lt quando verdade\\
+  \hline
+  10 & compara o registrador x e salta para Lt quando verdade\\
+  \hline
+\end{tabular}
+\end{center}
+
+Levando em consideração as informações acima, a tarefa de implementar as funções para os saltos condicionais é quase
+que intuitiva, tudo que resta é definir quais operadores serão usados para verificar cada condição. Como os valores
+serão interpretados em Racket como Bitvectors de 32 bits, é necessário que os operadores sejam capazes de trabalhar
+com esse tipo de dados.
+
+\begin{center}
+\begin{tabular}{ c c c }
+  Modo de endereçamento & Instrução & Operador Lógico\\
+  7, 8, 9 e 10          & jeq       & bveq\\
+  9 e 10                & jneq      & !bveq\\
+  9 e 10                & jne       & !bveq\\
+  9 e 10                & jlt       & bvslt\\
+  9 e 10                & jle       & bvsle\\
+  7, 8, 9 e 10          & jgt       & bvsgt\\
+  7, 8, 9 e 10          & jge       & bvsge\\
+  7, 8, 9 e 10          & jset      & bvand\\
+\end{tabular}
+\end{center}
+
+Esses operadores lógicos estão implementados na biblioteca bv que é importada para utilizar o tipo de dado
+já citado. No entanto, é necessário definir um operador bvneq como a negação de bveq, desta forma, as funções
+jneq e jne só precisam passar o operador para a função jump-cond, evitando um pouco a repetição de código. 
+
+\begin{lstlisting}
+  (define (bvneq x y)
+    (not (bveq x y)))
+\end{lstlisting}
+
+Estas informações são importantes pois o fato de que as funções serão extraídas da lista esperando um estado
+da maquina virtual, limita cada função a ter um número esperado de parâmetros e cada instrução é definida no
+seguinte padrão utilizando seu próprio nome e operador.
+
+\begin{lstlisting}
+  ;;;addressing mode 7
+  (define (jeq-add7 k lt lf st)
+    (jmp-cond st bveq k lt lf))
+
+  ;;;addressing mode 8
+  (define (jeq-add8 lt lf st)
+    (jmp-cond st bveq (ebpf-state-reg-x st) lt lf))
+
+  ;;;addressing mode 9
+  (define (jeq-add9 k lt st)
+    (jmp-cond st bveq k lt null))
+
+  ;;;addressing mode 10
+  (define (jeq-add10 lt st)
+    (jmp-cond st bveq (ebpf-state-reg-x st) lt null))
+\end{lstlisting}
+
+O restante das instruções, são operações aplicadas aos dados, isto é operações aritméticas e operações bit a bit,
+essas operações por definição precisam de dois valores, o primeiro será sempre o valor armazenado no acumulador A, o
+segundo valor poderá ser endereçado pelo usuário de duas formas diferentes.
+Lembrando que k é um campo genérico de uma instrução eBPF.
+
+\begin{center}
+  \begin{tabular}{ |c|c| }
+    \hline
+    Modo de endereçamento & Descrição\\
+    \hline
+    0 & Registrador x\\
+    \hline
+    4 & Valor literal em k\\
+    \hline
+  \end{tabular}
+  \end{center}
+
+Seguindo o pensamento utilizado na implementação das funções de salto o próximo objetivo foi definir uma função genérica que realiza
+essas instruções, as funções para que utilizam os modos de endereçamento acima serão executadas por uma função arith-instr ou uma
+função bitwise-ops como definição genérica conforme lexicalmente mais adequado, as instruções de operações aritméticas utilizam
+arith-instr e operações bit a bit usam bitwise-ops. 
+
+\begin{lstlisting}
+  (define (arith-instr k op st)
+    (match st
+      ((ebpf-state pc instrs m x a labels)
+      (ebpf-state (add1 pc) instrs m x (op a k) labels))))
+
+  (define bitwise-ops arith-instr)
+\end{lstlisting}
+
+A partir das funções auxiliares criadas acima, tudo que resta a ser feito é definir as funções que realizam as 
+instruções restantes.
+
+\begin{lstlisting}
+  ;;addressing mode 0
+  (define (INSTRUCAO-add0 st)
+      (FUNCAO (ebpf-state-reg-x st) OPERADOR st))
+  
+  ;;addressing mode 4
+  (define (INSTRUCAO-add4 k st)
+      (FUNCAO k OPERADOR st))
+  
+\end{lstlisting}
+
+Basta seguir a tabela e substituir de forma adequada, esta tarefa seria realizada de forma mais elegante
+utilizando macros, este seria o próximo passo do desenvolvimento, refatorar o código usando macros.
+
+\begin{center}
+  \begin{tabular}{ c c c }
+    FUNCAO       & INSTRUCAO & OPERADOR\\
+    arith-instr  & add       & bvadd\\
+    arith-instr  & sub       & bvsub\\
+    arith-instr  & mul       & bvmul\\
+    arith-instr  & div       & bvsdiv\\
+    arith-instr  & mod       & bvsmod\\
+    bitwise-ops  & and       & bvand\\
+    bitwise-ops  & or        & bvor\\
+    bitwise-ops  & xor       & bvxor\\
+    bitwise-ops  & lsh       & bvshl\\
+    bitwise-ops  & rsh       & bvlshr\\
+  \end{tabular}
+  \end{center}
 
 \section{Conclusão e Trabalhos Futuros}
 
